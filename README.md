@@ -6,7 +6,7 @@
 
 效果展示：
 
-![image-20260317004708565](.\image\6102e139106da28781b43524c43e6681.png)
+![image-20260317004708565](https://github.com/AshenskyABCDE/QQAIBot/blob/master/image/6102e139106da28781b43524c43e6681.png?raw=true)
 
 ## 🚀 快速开始（5分钟上手）
 
