@@ -26,7 +26,6 @@ skills/
 
 # Memory
 memory/
-*.md
 
 # Environment variables
 .env
