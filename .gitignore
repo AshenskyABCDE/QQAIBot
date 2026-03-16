@@ -1,0 +1,49 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Backup files
+*.backup.*
+*.bak
+
+# Logs
+logs/
+*.log
+
+# NapCat (用户自行放置)
+napcat/
+
+# Skills config (用户自定义)
+skills/
+
+# Memory
+memory/
+*.md
+
+# Environment variables
+.env
+
+# NapCat path config (用户自定义)
+.napcat-path.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temp
+tmp/
+temp/

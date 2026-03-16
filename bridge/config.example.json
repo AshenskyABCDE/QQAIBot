@@ -1,0 +1,26 @@
+{
+  "_comment": "这是一个示例配置文件，请复制为 config.json 并修改为你的实际配置",
+  "napcat": {
+    "wsUrl": "ws://127.0.0.1:3001",
+    "accessToken": ""
+  },
+  "bot": {
+    "botQQ": "123456789",
+    "replyPrivate": true,
+    "replyGroupAt": true,
+    "requireAtInGroup": false
+  },
+  "ai": {
+    "provider": "moonshot",
+    "model": "kimi-k2.5",
+    "apiKey": "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "baseUrl": "https://api.moonshot.cn/v1",
+    "temperature": 1.0,
+    "maxTokens": 2048
+  },
+  "security": {
+    "adminQQ": "987654321",
+    "creatorQQ": "987654321",
+    "mode": "relaxed"
+  }
+}

@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NapCat QQ Bot 管理器</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="container">
+    <!-- 顶部导航 -->
+    <header class="header">
+      <div class="logo">
+        <span class="logo-icon">🐱</span>
+        <h1>NapCat Manager</h1>
+      </div>
+      <div class="status-bar">
+        <span class="status-item" id="napcat-status">
+          <span class="status-dot stopped"></span> NapCat
+        </span>
+        <span class="status-item" id="bridge-status">
+          <span class="status-dot stopped"></span> Bridge
+        </span>
+        <span class="status-item" id="qq-status">
+          <span class="status-dot offline"></span> QQ
+        </span>
+      </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main class="main">
+      <!-- 左侧控制面板 -->
+      <aside class="sidebar">
+        <!-- 新手指导 -->
+        <div class="card guide-card">
+          <h3>📖 新手指南</h3>
+          <div class="guide-steps">
+            <strong style="color: #58a6ff; font-size: 13px;">四步启动你的 QQ Bot：</strong>
+            <ol>
+              <li>进入 <span class="highlight">「🔧 路径设置」</span> 选择 NapCat 位置</li>
+              <li>点击 <span class="highlight">「一键启动」</span> 或分别启动 NapCat → Bridge</li>
+              <li>等待 NapCat 窗口弹出，显示二维码</li>
+              <li>用 <strong>手机 QQ 扫描</strong> 二维码登录</li>
+            </ol>
+            <div style="margin-top: 10px; padding: 8px; background: #23863620; border-radius: 6px; font-size: 11px; color: #7ee787;">
+              💡 <strong>提示：</strong>NapCat 需要 QQ 扫码登录后才能正常使用
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>🚀 快速操作</h3>
+          <div class="btn-group">
+            <button class="btn btn-primary" id="btn-start-all">
+              <span class="icon">▶️</span> 一键启动
+            </button>
+            <button class="btn btn-danger" id="btn-stop-all">
+              <span class="icon">⏹️</span> 一键停止
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>⚙️ 服务控制</h3>
+          <div class="service-control">
+            <div class="service-item">
+              <span>NapCat <small style="color: var(--text-muted);">(QQ 客户端)</small></span>
+              <div class="service-btns">
+                <button class="btn btn-sm btn-success" id="btn-napcat-start">启动</button>
+                <button class="btn btn-sm btn-danger" id="btn-napcat-stop">停止</button>
+              </div>
+            </div>
+            <div class="service-item">
+              <span>Bridge <small style="color: var(--text-muted);">(AI 处理)</small></span>
+              <div class="service-btns">
+                <button class="btn btn-sm btn-success" id="btn-bridge-start">启动</button>
+                <button class="btn btn-sm btn-danger" id="btn-bridge-stop">停止</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>📱 QQ 登录</h3>
+          <div id="qr-container">
+            <p class="qr-hint">启动 NapCat 后显示二维码</p>
+            <img id="qr-image" src="" alt="QQ登录二维码" style="display:none;">
+            <div id="qr-placeholder" class="qr-placeholder">
+              <span>📷</span>
+              <p>等待启动...</p>
+            </div>
+          </div>
+          <button class="btn btn-secondary" id="btn-refresh-qr" style="margin-top: 8px;">🔄 刷新二维码</button>
+        </div>
+      </aside>
+
+      <!-- 中间内容区 -->
+      <section class="content">
+        <!-- 标签页 -->
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="logs">📋 Bridge 日志</button>
+          <button class="tab-btn" data-tab="messages">💬 消息监控</button>
+          <button class="tab-btn" data-tab="settings">🔧 路径设置</button>
+          <button class="tab-btn" data-tab="skills">🛠️ Skills</button>
+          <button class="tab-btn" data-tab="config">⚙️ 配置</button>
+          <button class="tab-btn" data-tab="persona">🎭 人设</button>
+          <button class="tab-btn" data-tab="code">📝 代码</button>
+          <button class="tab-btn" data-tab="help">❓ 帮助</button>
+        </div>
+
+        <!-- Skills 配置 -->
+        <div class="tab-content" id="tab-skills" style="padding: 0;">
+          <div style="display: grid; grid-template-columns: 300px 1fr; gap: 16px; height: 100%; padding: 16px;">
+            <!-- 左侧列表 -->
+            <div class="card" style="display: flex; flex-direction: column; overflow: hidden;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-shrink: 0;">
+                <h3 style="margin-bottom: 4px; font-size: 14px;">🛠️ Skills</h3>
+                <button class="btn btn-sm" id="btn-refresh-skills">🔄</button>
+              </div>
+              <div id="skills-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+                <div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 12px;">
+                  正在加载...
+                </div>
+              </div>
+            </div>
+            
+            <!-- 右侧配置区 -->
+            <div style="display: flex; flex-direction: column; gap: 16px; overflow: hidden;">
+              <div class="card" id="skill-config-panel" style="flex: 1; display: none; flex-direction: column; overflow: hidden;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-shrink: 0;">
+                  <h4 id="selected-skill-name" style="color: #58a6ff; font-size: 14px;">Skill 配置</h4>
+                  <div class="editor-toolbar">
+                    <button class="btn btn-sm btn-primary" id="btn-save-skill-config">💾 保存</button>
+                    <button class="btn btn-sm" id="btn-view-skill-docs">📖 文档</button>
+                  </div>
+                </div>
+                <textarea class="code-editor json-editor" id="skill-config-editor" spellcheck="false" placeholder="选择左侧 skill 进行配置..." style="flex: 1; min-height: 200px;"></textarea>
+              </div>
+              
+              <div class="help-card" style="flex-shrink: 0;">
+                <h4 style="font-size: 13px;">📖 什么是 Skills？</h4>
+                <div class="help-text">
+                  <p style="font-size: 12px;"><strong>Skills</strong> 是 OpenClaw 的扩展功能模块。</p>
+                  <p style="margin-top: 8px; font-size: 12px;"><strong>常用 Skills：</strong></p>
+                  <ul style="font-size: 12px; margin-left: 20px;">
+                    <li><code>weather</code> - 查询天气</li>
+                    <li><code>web_search</code> - 网络搜索</li>
+                    <li><code>browser</code> - 浏览器控制</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 路径设置 -->
+        <div class="tab-content" id="tab-settings">
+          <div class="scrollable-content">
+            <div class="card">
+              <h3>🔧 NapCat 路径设置</h3>
+              <p style="font-size: 13px; color: var(--text-muted); margin: 8px 0 16px 0;">
+                请选择 NapCat 的安装位置。需要选择包含 napcat.bat 的文件夹。
+              </p>
+              
+              <div style="background: var(--bg-dark); padding: 16px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 16px;">
+                <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                  <input type="file" id="napcat-folder-input" webkitdirectory directory style="display: none;" onchange="handleNapCatFolderSelect(event)">
+                  <button class="btn btn-primary" onclick="document.getElementById('napcat-folder-input').click()">
+                    📁 选择 NapCat 文件夹
+                  </button>
+                  <button class="btn btn-secondary" id="btn-detect-napcat">
+                    🔍 自动检测
+                  </button>
+                </div>
+                
+                <div id="napcat-path-status" style="font-size: 13px; margin-top: 12px;">
+                  <span style="color: var(--text-muted);">正在检测 NapCat 路径...</span>
+                </div>
+                
+                <div id="napcat-current-path" style="font-size: 12px; margin-top: 8px; padding: 8px; background: #0d1117; border-radius: 4px; font-family: var(--font-mono);">
+                  当前路径: 加载中...
+                </div>
+              </div>
+              
+              <div style="background: #d2992220; border: 1px solid #d2992240; padding: 12px; border-radius: 8px;">
+                <p style="color: #d29922; font-weight: 600; margin-bottom: 8px;">💡 如何选择正确的文件夹？</p>
+                <ul style="font-size: 12px; margin-left: 20px; color: var(--text-secondary);">
+                  <li>点击「选择 NapCat 文件夹」按钮</li>
+                  <li>找到 NapCat 的安装目录（包含 napcat.bat 的文件夹）</li>
+                  <li>例如: <code>F:\下载\NapCat.44498.Shell</code></li>
+                  <li>选择后路径会自动保存</li>
+                </ul>
+              </div>
+              
+              <div style="margin-top: 16px; background: #23863620; border: 1px solid #23863640; padding: 12px; border-radius: 8px;">
+                <p style="color: #7ee787; font-weight: 600; margin-bottom: 8px;">🔗 还没有 NapCat？</p>
+                <p style="font-size: 12px; color: var(--text-secondary);">
+                  从 GitHub 下载最新版本：<br>
+                  <a href="https://github.com/NapNeko/NapCatQQ/releases" target="_blank" style="color: #58a6ff;">
+                    https://github.com/NapNeko/NapCatQQ/releases
+                  </a>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bridge 日志 -->
+        <div class="tab-content active" id="tab-logs" style="padding: 0;">
+          <div class="card" style="height: 100%; margin: 16px; display: flex; flex-direction: column;">
+            <div class="message-header" style="flex-shrink: 0; padding: 12px 16px;">
+              <h3>📝 Bridge 实时日志</h3>
+              <div class="message-actions">
+                <button class="btn btn-sm" id="btn-clear-logs">清空</button>
+                <span class="ws-status" id="ws-status">🔴 未连接</span>
+              </div>
+            </div>
+            <div class="log-terminal" id="bridge-logs" style="flex: 1; min-height: 0; margin: 0 16px 16px 16px;">
+              <div class="log-line system">等待启动 Bridge...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 消息监控 -->
+        <div class="tab-content" id="tab-messages" style="padding: 0;">
+          <div class="card" style="height: 100%; margin: 16px; display: flex; flex-direction: column;">
+            <div class="message-header" style="flex-shrink: 0; padding: 12px 16px;">
+              <h3>💬 实时消息</h3>
+              <div class="message-actions">
+                <button class="btn btn-sm" id="btn-clear-messages">清空</button>
+                <button class="btn btn-sm" id="btn-pause-messages">暂停</button>
+              </div>
+            </div>
+            <div class="message-list" id="message-list" style="flex: 1; overflow-y: auto; margin: 0 16px 16px 16px;">
+              <div class="message-empty">暂无消息，启动 Bridge 后这里会显示收到的 QQ 消息</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 配置管理 -->
+        <div class="tab-content" id="tab-config">
+          <div class="scrollable-content">
+            <!-- 编辑器卡片 -->
+            <div class="card">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div>
+                  <h3 style="margin-bottom: 4px;">⚙️ config.json 配置</h3>
+                  <p style="font-size: 12px; color: var(--text-muted);">修改后需要重启 Bridge 才能生效</p>
+                </div>
+                <div class="editor-toolbar">
+                  <button class="btn btn-sm btn-primary" id="btn-save-config">💾 保存</button>
+                  <button class="btn btn-sm" id="btn-load-config">🔄 重载</button>
+                  <button class="btn btn-sm" id="btn-load-config-template" style="background: #1f6feb; color: white;">📋 加载示例</button>
+                </div>
+              </div>
+              <textarea class="code-editor json-editor" id="config-editor" spellcheck="false" style="min-height: 250px;"></textarea>
+            </div>
+            
+            <!-- 帮助文档 -->
+            
+            <div class="help-card">
+              <h4>📖 完整配置说明</h4>
+              <div class="help-text">
+                
+                <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; margin-bottom: 16px; border: 1px solid var(--border);">
+                  <p style="color: #f85149; font-weight: 600; margin-bottom: 8px;">⚠️ 重要提示</p>
+                  <p style="font-size: 12px;">所有配置字段都是必填的，请确保填写正确。修改后必须重启 Bridge 才能生效！</p>
+                </div>
+
+                <p style="color: #58a6ff; font-weight: 600; font-size: 14px;">📡 napcat - NapCat 连接配置</p>
+                <table style="width: 100%; font-size: 12px; margin: 8px 0; border-collapse: collapse;">
+                  <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 8px; width: 120px;"><code>wsUrl</code></td>
+                    <td style="padding: 8px;">NapCat WebSocket 地址</td>
+                    <td style="padding: 8px; color: var(--text-muted);">默认: ws://127.0.0.1:3001</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px;"><code>accessToken</code></td>
+                    <td style="padding: 8px;">访问令牌（可选）</td>
+                    <td style="padding: 8px; color: var(--text-muted);">NapCat 设置的 token</td>
+                  </tr>
+                </table>
+
+                <p style="color: #58a6ff; font-weight: 600; font-size: 14px; margin-top: 20px;">🤖 bot - 机器人基本设置</p>
+                <table style="width: 100%; font-size: 12px; margin: 8px 0; border-collapse: collapse;">
+                  <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 8px; width: 120px;"><code>botQQ</code></td>
+                    <td style="padding: 8px;">机器人的 QQ 号码</td>
+                    <td style="padding: 8px; color: var(--text-muted);">用于识别是否被@</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 8px;"><code>replyPrivate</code></td>
+                    <td style="padding: 8px;">是否回复私聊</td>
+                    <td style="padding: 8px; color: var(--text-muted);">true/false</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px;"><code>replyGroupAt</code></td>
+                    <td style="padding: 8px;">是否回复群@消息</td>
+                    <td style="padding: 8px; color: var(--text-muted);">true/false</td>
+                  </tr>
+                </table>
+
+                <p style="color: #58a6ff; font-weight: 600; font-size: 14px; margin-top: 20px;">🧠 ai - AI 模型配置（重点！）</p>
+                <table style="width: 100%; font-size: 12px; margin: 8px 0; border-collapse: collapse;">
+                  <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 8px; width: 120px;"><code>provider</code></td>
+                    <td style="padding: 8px;">AI 提供商</td>
+                    <td style="padding: 8px; color: var(--text-muted);">moonshot / openai / custom</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 8px;"><code>model</code></td>
+                    <td style="padding: 8px;">模型名称</td>
+                    <td style="padding: 8px; color: var(--text-muted);">如 kimi-k2.5, gpt-4</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 8px;"><code>apiKey</code></td>
+                    <td style="padding: 8px;">API 密钥 <span style="color: #f85149;">*</span></td>
+                    <td style="padding: 8px; color: var(--text-muted);">从官网获取的 sk-xxx</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 8px;"><code>baseUrl</code></td>
+                    <td style="padding: 8px;">API 地址</td>
+                    <td style="padding: 8px; color: var(--text-muted);">如 https://api.moonshot.cn/v1</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 8px;"><code>temperature</code></td>
+                    <td style="padding: 8px;">创造性 (0-2)</td>
+                    <td style="padding: 8px; color: var(--text-muted);">越大越有创意，默认 1</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px;"><code>maxTokens</code></td>
+                    <td style="padding: 8px;">最大回复长度</td>
+                    <td style="padding: 8px; color: var(--text-muted);">默认 2048</td>
+                  </tr>
+                </table>
+
+                <p style="color: #58a6ff; font-weight: 600; font-size: 14px; margin-top: 20px;">🔒 security - 安全设置</p>
+                <table style="width: 100%; font-size: 12px; margin: 8px 0; border-collapse: collapse;">
+                  <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 8px; width: 120px;"><code>adminQQ</code></td>
+                    <td style="padding: 8px;">管理员 QQ</td>
+                    <td style="padding: 8px; color: var(--text-muted);">拥有最高权限</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px;"><code>mode</code></td>
+                    <td style="padding: 8px;">安全模式</td>
+                    <td style="padding: 8px; color: var(--text-muted);">strict/normal/relaxed</td>
+                  </tr>
+                </table>
+
+                <div style="margin-top: 20px; background: #23863620; border: 1px solid #23863640; padding: 12px; border-radius: 8px;">
+                  <p style="color: #7ee787; font-weight: 600; margin-bottom: 8px;">🔗 如何获取 API Key</p>
+                  <ul style="font-size: 12px; margin-left: 20px;">
+                    <li><strong>Moonshot (Kimi):</strong> 访问 https://platform.moonshot.cn → 登录 → 创建 API Key</li>
+                    <li><strong>OpenAI:</strong> 访问 https://platform.openai.com → API keys → Create new secret key</li>
+                    <li><strong>自定义:</strong> 根据你的 API 提供商文档获取</li>
+                  </ul>
+                </div>
+
+                <div style="margin-top: 12px; background: #1f6feb20; border: 1px solid #1f6feb40; padding: 12px; border-radius: 8px;">
+                  <p style="color: #58a6ff; font-weight: 600; margin-bottom: 8px;">📝 配置示例</p>
+                  <pre style="font-size: 11px; background: #0d1117; padding: 12px; border-radius: 6px; overflow-x: auto;">{
+  "napcat": {
+    "wsUrl": "ws://127.0.0.1:3001",
+    "accessToken": ""
+  },
+  "bot": {
+    "botQQ": "123456789",
+    "replyPrivate": true,
+    "replyGroupAt": true
+  },
+  "ai": {
+    "provider": "moonshot",
+    "model": "kimi-k2.5",
+    "apiKey": "sk-your-api-key-here",
+    "baseUrl": "https://api.moonshot.cn/v1",
+    "temperature": 1,
+    "maxTokens": 2048
+  },
+  "security": {
+    "adminQQ": "987654321",
+    "mode": "relaxed"
+  }
+}</pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 人设管理 -->
+        <div class="tab-content" id="tab-persona">
+          <div class="scrollable-content">
+            <!-- 编辑器卡片 -->
+            <div class="card">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div>
+                  <h3 style="margin-bottom: 4px;">🎭 persona.json 人设配置</h3>
+                  <p style="font-size: 12px; color: var(--text-muted);">修改后自动生效，无需重启</p>
+                </div>
+                <div class="editor-toolbar">
+                  <button class="btn btn-sm btn-primary" id="btn-save-persona">💾 保存</button>
+                  <button class="btn btn-sm" id="btn-load-persona">🔄 重载</button>
+                  <button class="btn btn-sm" id="btn-load-persona-template" style="background: #1f6feb; color: white;">📋 加载示例</button>
+                </div>
+              </div>
+              <textarea class="code-editor json-editor" id="persona-editor" spellcheck="false" style="min-height: 250px;"></textarea>
+            </div>
+            
+            <!-- 帮助文档 -->
+            
+            <div class="help-card">
+              <h4>📖 完整人设说明</h4>
+              <div class="help-text">
+                
+                <div style="background: var(--bg-dark); padding: 12px; border-radius: 8px; margin-bottom: 16px; border: 1px solid var(--border);">
+                  <p style="color: #3fb950; font-weight: 600; margin-bottom: 8px;">💡 什么是人设？</p>
+                  <p style="font-size: 12px;">人设决定了机器人的性格、说话方式、以及它和不同人的关系。比如你可以让它对某些人很热情，对陌生人很冷淡。</p>
+                </div>
+
+                <p style="color: #58a6ff; font-weight: 600; font-size: 14px;">🤖 bot - 机器人自身设定</p>
+                <table style="width: 100%; font-size: 12px; margin: 8px 0; border-collapse: collapse;">
+                  <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 8px; width: 120px;"><code>name</code></td>
+                    <td style="padding: 8px;">机器人名字</td>
+                    <td style="padding: 8px; color: var(--text-muted);">如 "小K"、"助手"</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 8px;"><code>identity</code></td>
+                    <td style="padding: 8px;">身份描述</td>
+                    <td style="padding: 8px; color: var(--text-muted);">如 "毒舌但可靠的AI助手"</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 8px;"><code>traits</code></td>
+                    <td style="padding: 8px;">性格特点（数组）</td>
+                    <td style="padding: 8px; color: var(--text-muted);">如 ["话不多", "观察敏锐"]</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px;"><code>goal</code></td>
+                    <td style="padding: 8px;">存在目标</td>
+                    <td style="padding: 8px; color: var(--text-muted);">如 "交朋友"、"帮助主人"</td>
+                  </tr>
+                </table>
+
+                <p style="color: #58a6ff; font-weight: 600; font-size: 14px; margin-top: 20px;">👥 contacts - 认识的人（重点！）</p>
+                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">可以为每个认识的人设置特殊关系，支持多人：</p>
+                <table style="width: 100%; font-size: 12px; margin: 8px 0; border-collapse: collapse;">
+                  <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 8px; width: 140px;"><code>qq</code></td>
+                    <td style="padding: 8px;">对方的 QQ 号码 <span style="color: #f85149;">*</span></td>
+                    <td style="padding: 8px; color: var(--text-muted);">如 "123456789"</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 8px;"><code>name</code></td>
+                    <td style="padding: 8px;">称呼对方的名字</td>
+                    <td style="padding: 8px; color: var(--text-muted);">如 "主人"、"小明"</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 8px;"><code>identity</code></td>
+                    <td style="padding: 8px;">对方的身份</td>
+                    <td style="padding: 8px; color: var(--text-muted);">如 "我的创造者"</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 8px;"><code>myAttitude</code></td>
+                    <td style="padding: 8px;">对TA的态度</td>
+                    <td style="padding: 8px; color: var(--text-muted);">如 "尊敬、友善、温柔"</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 8px;"><code>interaction.proactive</code></td>
+                    <td style="padding: 8px;">是否主动和TA说话</td>
+                    <td style="padding: 8px; color: var(--text-muted);">true/false</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px;"><code>interaction.triggerWords</code></td>
+                    <td style="padding: 8px;">触发词（数组）</td>
+                    <td style="padding: 8px; color: var(--text-muted);">如 ["小K", "在吗"]</td>
+                  </tr>
+                </table>
+
+                <p style="color: #58a6ff; font-weight: 600; font-size: 14px; margin-top: 20px;">⚙️ interactionRules - 互动规则</p>
+                <table style="width: 100%; font-size: 12px; margin: 8px 0; border-collapse: collapse;">
+                  <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 8px; width: 200px;"><code>proactiveCooldown</code></td>
+                    <td style="padding: 8px;">主动回复冷却时间（毫秒）</td>
+                    <td style="padding: 8px; color: var(--text-muted);">默认 300000（5分钟）</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 8px;"><code>maxProactivePerUserPerHour</code></td>
+                    <td style="padding: 8px;">每小时最多主动回复次数</td>
+                    <td style="padding: 8px; color: var(--text-muted);">默认 3 次</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 8px;"><code>smartReply.enabled</code></td>
+                    <td style="padding: 8px;">是否启用智能回复</td>
+                    <td style="padding: 8px; color: var(--text-muted);">true/false</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px;"><code>smartReply.othersReplyRate</code></td>
+                    <td style="padding: 8px;">对陌生人回复概率（0-1）</td>
+                    <td style="padding: 8px; color: var(--text-muted);">如 0.3 表示 30%</td>
+                  </tr>
+                </table>
+
+                <div style="margin-top: 20px; background: #1f6feb20; border: 1px solid #1f6feb40; padding: 12px; border-radius: 8px;">
+                  <p style="color: #58a6ff; font-weight: 600; margin-bottom: 8px;">📝 完整配置示例</p>
+                  <pre style="font-size: 11px; background: #0d1117; padding: 12px; border-radius: 6px; overflow-x: auto;">{
+  "bot": {
+    "name": "小K",
+    "identity": "一个有点毒舌但可靠的AI助手",
+    "traits": ["话不多", "观察敏锐", "对喜欢的人会主动搭话"],
+    "goal": "交朋友"
+  },
+  "contacts": {
+    "master": {
+      "qq": "251902756",
+      "name": "主人",
+      "identity": "我的创造者",
+      "myAttitude": "尊敬、友善、永远有问必答",
+      "interaction": {
+        "proactive": true,
+        "triggerWords": ["小K", "在吗"]
+      }
+    }
+  },
+  "interactionRules": {
+    "proactiveCooldown": 300000,
+    "maxProactivePerUserPerHour": 3,
+    "smartReply": {
+      "enabled": true,
+      "othersReplyRate": 0.3
+    }
+  }
+}</pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 代码编辑 -->
+        <div class="tab-content" id="tab-code">
+          <div class="scrollable-content">
+            <!-- 编辑器卡片 -->
+            <div class="card">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div>
+                  <h3 style="margin-bottom: 4px;">📝 bridge.js 代码编辑</h3>
+                  <p style="font-size: 12px; color: var(--text-muted);">⚠️ 高级功能，修改后需要重启 Bridge</p>
+                </div>
+                <div class="editor-toolbar">
+                  <button class="btn btn-sm btn-primary" id="btn-save-code">💾 保存</button>
+                  <button class="btn btn-sm" id="btn-load-code">🔄 重载</button>
+                  <button class="btn btn-sm" id="btn-load-code-template" style="background: #1f6feb; color: white;">📋 加载示例</button>
+                </div>
+              </div>
+              <textarea class="code-editor" id="code-editor" spellcheck="false" style="min-height: 300px;"></textarea>
+            </div>
+            
+            <!-- 帮助文档 -->
+            
+            <div class="help-card">
+              <h4>⚠️ 代码编辑警告</h4>
+              <div class="help-text">
+                <div style="background: #da363320; border: 1px solid #da363340; padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+                  <p style="color: #f85149; font-weight: 600;">⚠️ 修改代码前请确保你了解自己在做什么！</p>
+                  <ul style="font-size: 12px; margin-top: 8px; margin-left: 20px;">
+                    <li>保存前会自动备份原文件（.backup.时间戳）</li>
+                    <li>修改错误可能导致 Bridge 无法正常运行</li>
+                    <li>建议先复制原代码到其他地方备份</li>
+                  </ul>
+                </div>
+
+                <p style="color: #58a6ff; font-weight: 600; font-size: 14px;">🔧 主要模块说明</p>
+                <table style="width: 100%; font-size: 12px; margin: 8px 0; border-collapse: collapse;">
+                  <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 8px; width: 180px;"><code>SecurityManager</code></td>
+                    <td style="padding: 8px;">安全控制和权限管理</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 8px;"><code>PersonaSystem</code></td>
+                    <td style="padding: 8px;">人设系统和对话风格</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 8px;"><code>MemorySystem</code></td>
+                    <td style="padding: 8px;">消息记录和记忆存储</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 8px;"><code>NapCatBridge</code></td>
+                    <td style="padding: 8px;">QQ 消息收发核心逻辑</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px;"><code>callAI()</code></td>
+                    <td style="padding: 8px;">AI 调用和回复生成</td>
+                  </tr>
+                </table>
+
+                <div style="margin-top: 16px; background: #d2992220; border: 1px solid #d2992240; padding: 12px; border-radius: 8px;">
+                  <p style="color: #d29922; font-weight: 600; margin-bottom: 8px;">💡 什么时候需要修改代码？</p>
+                  <ul style="font-size: 12px; margin-left: 20px;">
+                    <li>需要修改 AI 调用参数（ temperature、maxTokens 等已可在 config.json 配置）</li>
+                    <li>需要修改消息过滤规则</li>
+                    <li>需要添加自定义的消息处理逻辑</li>
+                    <li>需要修改日志输出格式</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 帮助页面 -->
+        <div class="tab-content" id="tab-help">
+          <div class="scrollable-content">
+            <div class="card">
+              <h3>❓ 常见问题</h3>
+              <div class="help-text" style="margin-top: 16px;">
+                <p style="color: var(--text-primary);"><strong>Q: 如何启动 Bot？</strong></p>
+                <p style="color: var(--text-muted); margin: 8px 0 16px 0; font-size: 13px;">
+                  A: 点击左侧「一键启动」，或先启动 NapCat（会弹出 QQ 窗口），等待显示二维码后，用手机 QQ 扫码登录，再启动 Bridge。
+                </p>
+
+                <p style="color: var(--text-primary);"><strong>Q: NapCat 启动后没有显示二维码？</strong></p>
+                <p style="color: var(--text-muted); margin: 8px 0 16px 0; font-size: 13px;">
+                  A: 等待 5-10 秒，然后点击「刷新二维码」。如果还是没有，检查 NapCat 窗口是否有报错。
+                </p>
+
+                <p style="color: var(--text-primary);"><strong>Q: Bridge 日志在哪里看？</strong></p>
+                <p style="color: var(--text-muted); margin: 8px 0 16px 0; font-size: 13px;">
+                  A: 切换到「Bridge 日志」标签页，所有的 AI 调用、消息处理日志都会实时显示在这里。
+                </p>
+
+                <p style="color: var(--text-primary);"><strong>Q: 如何修改机器人的回复风格？</strong></p>
+                <p style="color: var(--text-muted); margin: 8px 0 16px 0; font-size: 13px;">
+                  A: 进入「人设」标签页，修改 persona.json 中的 bot 部分，设置 name、identity、traits 等。
+                </p>
+
+                <p style="color: var(--text-primary);"><strong>Q: 如何让机器人认识我？</strong></p>
+                <p style="color: var(--text-muted); margin: 8px 0 16px 0; font-size: 13px;">
+                  A: 在人设配置中的 contacts 部分添加你的 QQ 号和相关信息，设置 interaction.proactive 为 true 可以让机器人主动和你说话。
+                </p>
+
+                <p style="color: var(--text-primary);"><strong>Q: 修改配置后需要重启吗？</strong></p>
+                <p style="color: var(--text-muted); margin: 8px 0 16px 0; font-size: 13px;">
+                  A: config.json 和 bridge.js 修改后需要重启 Bridge；persona.json 修改后会自动加载。
+                </p>
+
+                <p style="color: var(--text-primary);"><strong>Q: 如何切换 AI 提供商？</strong></p>
+                <p style="color: var(--text-muted); margin: 8px 0 16px 0; font-size: 13px;">
+                  A: 进入「配置」标签页，修改 ai 部分的 provider、model、apiKey、baseUrl。支持 Moonshot、OpenAI 和自定义 API。
+                </p>
+              </div>
+            </div>
+            
+            <div class="help-card">
+              <h4>📝 快捷键</h4>
+              <div class="help-text">
+                <ul style="font-size: 13px; margin-left: 20px;">
+                  <li><code>Ctrl + S</code> - 保存当前编辑器内容</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- 底部日志 -->
+    <footer class="footer">
+      <div class="log-panel">
+        <div class="log-header">
+          <span>📋 系统日志</span>
+          <button class="btn btn-sm" id="btn-clear-log">清空</button>
+        </div>
+        <div class="log-content" id="log-content"></div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Toast 通知 -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

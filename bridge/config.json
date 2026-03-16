@@ -1,0 +1,25 @@
+{
+  "napcat": {
+    "wsUrl": "ws://127.0.0.1:3001",
+    "accessToken": "你的NapCat-AccessToken"
+  },
+  "bot": {
+    "botQQ": "你的机器人QQ号",
+    "replyPrivate": true,
+    "replyGroupAt": true,
+    "requireAtInGroup": false
+  },
+  "ai": {
+    "provider": "moonshot",
+    "model": "kimi-k2.5",
+    "apiKey": "sk-你的Moonshot-API-Key",
+    "baseUrl": "https://api.moonshot.cn/v1",
+    "temperature": 1,
+    "maxTokens": 2048
+  },
+  "security": {
+    "adminQQ": "你的QQ号",
+    "creatorQQ": "你的QQ号",
+    "mode": "relaxed"
+  }
+}
